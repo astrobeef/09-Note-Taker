@@ -56,11 +56,14 @@ app.post("/api/notes", function (req, res) {
 
     console.log("--> Front end is attempting to input a new note...")
 
-    const newNote = JSON.stringify(req.body);
+    const newNote = req.body;
+    
+    newNote.id = notes.length + 1;
 
-    console.log(newNote);
+    console.log(newNote.id);
+    console.log("^^^ new key");
 
-    notes.push(JSON.parse(newNote));
+    notes.push(newNote);
 
     storeToDB(notes, location_DB);
 

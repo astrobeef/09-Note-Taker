@@ -42,4 +42,8 @@ Using CRUD methods between the front-end and the back-end: retrieve, create, and
 
 Deployed Webpage
 
+https://note-taker-09.herokuapp.com/
+
+Github page
+
 https://github.com/astrobeef/09-Note-Taker

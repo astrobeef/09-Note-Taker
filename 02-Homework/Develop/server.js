@@ -1,5 +1,9 @@
 const express = require("express");
 const fs = require("fs");
+const util = require("util");
+
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -13,21 +17,21 @@ app.use(express.json());
 
 const location_DB = "./db/db.json";
 
-const notes = [
+let notes = [
     {
-        title : "Title",
-        text : "Text",
-        id : 1
+        title: "Title",
+        text: "Text",
+        id: 1
     },
     {
-        title : "Title",
-        text : "Text",
-        id : 2
+        title: "Title",
+        text: "Text",
+        id: 2
     },
     {
-        title : "Title",
-        text : "Text",
-        id : 3
+        title: "Title",
+        text: "Text",
+        id: 3
     }
 
 ];
@@ -56,7 +60,7 @@ app.post("/api/notes", function (req, res) {
 
     console.log(newNote);
 
-    notes.push(newNote);
+    notes.push(JSON.parse(newNote));
 
     storeToDB(notes, location_DB);
 
@@ -64,7 +68,7 @@ app.post("/api/notes", function (req, res) {
 
     console.log("POST^^^^^^^^^^^^^^" + req.path + "^^^^^^^^^^^^^^^^POST");
 
-    res.end();
+    res.json(notes);
 })
 
 app.delete("/api/notes/:id", function (req, res) {
@@ -75,10 +79,8 @@ app.delete("/api/notes/:id", function (req, res) {
 
     console.log("--> Front end is attempting to delete a note with the id : " + id);
 
-    for(let i = 0; i < notes.length; i++)
-    {
-        if(notes[i].id === id)
-        {
+    for (let i = 0; i < notes.length; i++) {
+        if (notes[i].id === id) {
             removedNote = notes.splice(i, 1);
             res.json(removedNote);
         }
@@ -95,20 +97,36 @@ app.delete("/api/notes/:id", function (req, res) {
 
 //Functions//
 
-async function storeToDB(content, location)
-{
-    console.log("<><><> Storing content to the location '" , location , "' <><><>");
+async function storeToDB(content, location) {
+    console.log("<><><> Storing content to the location '", location, "' <><><>");
 
     cont_JSON = JSON.stringify(content);
 
-    await fs.writeFileSync(location, cont_JSON, function(err){
-        if(err) throw(err);
+    await fs.writeFile(location, cont_JSON, function (err) {
+        if (err) throw (err);
     })
 
-    await fs.readFile(location, "utf8", function(err, data){
+    await fs.readFile(location, "utf8", function (err, data) {
         console.log(data);
         return data;
     })
 }
 
-app.listen(PORT, () => console.log(`App listening on http://localhost:${PORT}`))
+
+async function setNotes() {
+    console.log("Setting notes");
+
+    notes.length = 0;
+
+    notes = await readFileAsync(location_DB, "utf8").then(function(data){
+        console.log(data);
+        console.log("Notes set");
+        return data;
+    })
+
+    console.log("Finished");
+
+    console.log(notes);
+};
+
+app.listen(PORT, () => console.log(`App listening on http://localhost:${PORT}`));
